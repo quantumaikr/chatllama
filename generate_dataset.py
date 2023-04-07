@@ -1,6 +1,6 @@
 from langchain import OpenAI, LLMChain, PromptTemplate
 from langchain.chains.conversation.memory import (
-    ConversationalBufferWindowMemory,
+    ConversationBufferWindowMemory,
 )
 
 from chatllama.langchain_modules.prompt_templates import (
@@ -8,8 +8,7 @@ from chatllama.langchain_modules.prompt_templates import (
     AI_CHATBOT_TEMPLATE,
 )
 
-
-CONVERSATION_LENGTH = 20
+CONVERSATION_LENGTH = 10
 
 
 def create_conversation(human_agent: LLMChain, bot_agent: LLMChain):
@@ -21,6 +20,7 @@ def create_conversation(human_agent: LLMChain, bot_agent: LLMChain):
         conversation.append(f"Human: {human_output}")
         chatbot_output = bot_agent.run(human_input=human_output)
         conversation.append(f"AI: {chatbot_output}")
+        print('conversation', conversation)
     return "\n".join(conversation)
 
 
@@ -32,18 +32,37 @@ def build_agents():
     human_agent = LLMChain(
         llm=llm,
         prompt=human_template,
-        memory=ConversationalBufferWindowMemory(k=4),
+        memory=ConversationBufferWindowMemory(k=4),
     )
     bot_template = PromptTemplate(**AI_CHATBOT_TEMPLATE)
     bot_agent = LLMChain(
         llm=llm,
         prompt=bot_template,
-        memory=ConversationalBufferWindowMemory(k=4),
+        memory=ConversationBufferWindowMemory(k=4),
     )
     return human_agent, bot_agent
 
 
 def main():
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument("--num_conversations", type=int, default=1000)
+    parser.add_argument("--output_file", type=str, default="conversations.txt")
+    args = parser.parse_args()
+    print('args.num_conversations')
+    conversations = []
+    print('args.num_conversations', args.num_conversations)
+    for conv in range(args.num_conversations):
+        human_agent, bot_agent = build_agents()
+        conversation = create_conversation(human_agent, bot_agent)
+        conversations.append(conversation)
+    with open(args.output_file, "w") as f:
+        f.write("\n\nNEW CONVERSATION\n\n".join(conversations))
+
+
+
+if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
