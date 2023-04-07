@@ -8,7 +8,7 @@ from chatllama.langchain_modules.prompt_templates import (
     AI_CHATBOT_TEMPLATE,
 )
 
-CONVERSATION_LENGTH = 10
+CONVERSATION_LENGTH = 5
 
 
 def create_conversation(human_agent: LLMChain, bot_agent: LLMChain):
@@ -27,7 +27,7 @@ def create_conversation(human_agent: LLMChain, bot_agent: LLMChain):
 def build_agents():
     # be aware that too long completions will not fit the sequence length
     # of possible critic or reward models ...
-    llm = OpenAI(max_tokens=2048, temperature=0.7)
+    llm = OpenAI(max_tokens=1024, temperature=0.7)
     human_template = PromptTemplate(**PERSON_CHATBOT_TEMPLATE)
     human_agent = LLMChain(
         llm=llm,
